@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+  <title>Countdown Timer</title>
+</head>
+<body>
+  <div id="countdown">
+    <p id="timer">
+        <span id="days"></span>
+        <span class="timer-unit">Days</span>
+        <span id="hours"></span>
+        <span class="timer-unit">Hours</span>
+        <span id="minutes"></span>
+        <span class="timer-unit">Minutes</span>
+        <span id="seconds"></span>
+        <span class="timer-unit">Seconds</span>
+    </p>
+  </div>
+  
+  <script>
+    let tid = -1;
+    function reloader(rec) {
+      const ws = new WebSocket(window.location.origin.replace("http", "ws") + "/ws");
+      ws.onerror = (e) => {
+        if(rec > 10) return;
+        tid = setTimeout(() => reloader(rec + 1), 1000);
+      };
+      ws.onmessage = (e) => {
+        if(tid > -1) clearTimeout(tid);
+        tid = -1;
+        ws.close();
+        setTimeout(() => window.location.reload(), 100);
+      };
+    }
+    reloader(0);
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>   
