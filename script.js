@@ -1,10 +1,14 @@
-const targetDate = new Date('2026-03-28T00:00:00'); // Set your target
+const targetDate = new Date('2026-03-28T00:00:00');
 
 function updateCountdown() {
   const currentTime = new Date();
-  const targetDate2 = Date.now();
-  const difference = targetDate - currentTime;
-  
+  let nextBirthday = new Date(targetDate);
+
+  if (currentTime > nextBirthday) {
+    nextBirthday.setFullYear(nextBirthday.getFullYear() + 1);
+  }
+
+  const difference = nextBirthday - currentTime;
 
   const days = Math.floor(difference / (1000 * 60 * 60 * 24));
   let hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -12,126 +16,14 @@ function updateCountdown() {
   const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
   document.querySelector("#days").innerText = days;
-  document.querySelector("#hours").innerText = hours + 6;
+  document.querySelector("#hours").innerText = hours;
   document.querySelector("#minutes").innerText = minutes;
   document.querySelector("#seconds").innerText = seconds;
 
   if (difference < 0) {
       clearInterval(interval);
-      document.querySelector("timer").innerText = "The event has started!";
+      document.querySelector("#timer").innerText = "The event has started!";
   }
 }
 
 const interval = setInterval(updateCountdown, 1000);
-
-const calculator = {
-  displayValue: '0',
-  firstOperand: null,
-  waitingForSecondOperand: false,
-  operator: null,
-};
-
-function inputDigit(digit) {
-  const { displayValue, waitingForSecondOperand } = calculator;
-
-  if (waitingForSecondOperand === true) {
-    calculator.displayValue = digit;
-    calculator.waitingForSecondOperand = false;
-  } else {
-    calculator.displayValue = displayValue === '0' ? digit : displayValue + digit;
-  }
-}
-
-function inputDecimal(dot) {
-  if (calculator.waitingForSecondOperand === true) {
-  	calculator.displayValue = "0."
-    calculator.waitingForSecondOperand = false;
-    return
-  }
-
-  if (!calculator.displayValue.includes(dot)) {
-    calculator.displayValue += dot;
-  }
-}
-
-function handleOperator(nextOperator) {
-  const { firstOperand, displayValue, operator } = calculator
-  const inputValue = parseFloat(displayValue);
-  
-  if (operator && calculator.waitingForSecondOperand)  {
-    calculator.operator = nextOperator;
-    return;
-  }
-
-
-  if (firstOperand == null && !isNaN(inputValue)) {
-    calculator.firstOperand = inputValue;
-  } else if (operator) {
-    const result = calculate(firstOperand, inputValue, operator);
-
-    calculator.displayValue = `${parseFloat(result.toFixed(7))}`;
-    calculator.firstOperand = result;
-  }
-
-  calculator.waitingForSecondOperand = true;
-  calculator.operator = nextOperator;
-}
-
-function calculate(firstOperand, secondOperand, operator) {
-  if (operator === '+') {
-    return firstOperand + secondOperand;
-  } else if (operator === '-') {
-    return firstOperand - secondOperand;
-  } else if (operator === '*') {
-    return firstOperand * secondOperand;
-  } else if (operator === '/') {
-    return firstOperand / secondOperand;
-  }
-
-  return secondOperand;
-}
-
-function resetCalculator() {
-  calculator.displayValue = '0';
-  calculator.firstOperand = null;
-  calculator.waitingForSecondOperand = false;
-  calculator.operator = null;
-}
-
-function updateDisplay() {
-  const display = document.querySelector('.calculator-screen');
-  display.value = calculator.displayValue;
-}
-
-updateDisplay();
-
-const keys = document.querySelector('.calculator-keys');
-keys.addEventListener('click', event => {
-  const { target } = event;
-  const { value } = target;
-  if (!target.matches('button')) {
-    return;
-  }
-
-  switch (value) {
-    case '+':
-    case '-':
-    case '*':
-    case '/':
-    case '=':
-      handleOperator(value);
-      break;
-    case '.':
-      inputDecimal(value);
-      break;
-    case 'all-clear':
-      resetCalculator();
-      break;
-    default:
-      if (Number.isInteger(parseFloat(value))) {
-        inputDigit(value);
-      }
-  }
-
-  updateDisplay();
-});
